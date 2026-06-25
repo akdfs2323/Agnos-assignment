@@ -40,22 +40,37 @@ A responsive, real-time medical intake form and administrative monitor dashboard
 
 ### Real-Time Synchronization Sequence
 
-```
-[Patient Tab]                    [Custom Node Server]                   [Staff Tab]
-      |                                    |                                 |
-      |--- 1. socket.emit('patient:join') ->|                                 |
-      |                                    |--- 2. socket.emit('staff:join')->|
-      |                                    |                                 |
-      |                                    |<-- 3. Broadcast session list ----|
-      |                                    |                                 |
-      |--- 4. Patient types (filling) ---->|                                 |
-      |                                    |--- 5. Broadcast live data ------>| (Updates selected view)
-      |                                    |                                 |
-      |--- 6. No activity for 10s (idle) ->|                                 |
-      |                                    |--- 7. Broadcast state 'inactive'->| (Changes status light)
-      |                                    |                                 |
-      |--- 8. Submit Form (submitted) ---->|                                 |
-      |                                    |--- 9. Broadcast state 'submitted'->| (Marks done)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Patient as Patient Portal
+    participant Server as Custom WebSocket Server
+    actor Staff as Staff Dashboard
+
+    %% Initialization
+    Patient->>Server: Connect WebSocket
+    Note over Patient,Server: Patient joins room (session ID)
+    Staff->>Server: Connect WebSocket
+    Note over Staff,Server: Staff joins monitor channel
+    Server-->>Staff: Send Initial Active Sessions List
+
+    %% Live updates
+    loop Patient Types
+        Patient->>Server: patient:update (Form Data, Status: "filling")
+        Server->>Staff: staff:update (Form Data, Status: "filling")
+        Note over Staff: Live values update in Inspector
+    end
+
+    %% Idle detection
+    Note over Patient: 10 seconds of inactivity
+    Patient->>Server: patient:update (Status: "inactive")
+    Server->>Staff: staff:update (Status: "inactive")
+    Note over Staff: Status tag transitions to IDLE
+
+    %% Submission
+    Patient->>Server: patient:update (Form Data, Status: "submitted")
+    Server->>Staff: staff:update (Form Data, Status: "submitted")
+    Note over Staff: Status tag transitions to DONE
 ```
 
 ---
