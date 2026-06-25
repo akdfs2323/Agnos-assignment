@@ -1,8 +1,11 @@
 # Agnos Patient Portal & Monitor Dashboard (Real-Time Synchronization)
 
+🔗 **Live Demo**: [https://agnos-assignment-xi.vercel.app](https://agnos-assignment-xi.vercel.app)
+
 A responsive, real-time medical intake form and administrative monitor dashboard built with **Next.js (App Router)**, **TailwindCSS**, **TypeScript**, and **Socket.io**. It is designed to run seamlessly out-of-the-box locally, with full support for serverless environment fallbacks.
 
 ---
+
 
 ## 🌟 Key Features
 
